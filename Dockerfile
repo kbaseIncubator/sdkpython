@@ -1,0 +1,31 @@
+FROM ubuntu:20.04
+
+RUN \
+    apt-get -y update && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    export TZ=Etc/UTC && \
+    apt-get -y install gcc make curl git openjdk-8-jre
+
+# Copy in the SDK
+COPY --from=kbase/kb-sdk:20180808 /src /sdk
+RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
+
+RUN \
+    V=py38_4.10.3 && \
+    curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${V}-Linux-x86_64.sh && \
+    sh ./conda.sh -b -p /opt/conda3 && \
+    rm conda.sh
+
+ENV PATH=/opt/conda3/bin:$PATH:/sdk/bin
+
+# Install packages including mamba
+RUN \
+    conda install -c conda-forge mamba
+
+ADD ./requirements.txt /tmp/
+RUN \
+    pip install -r /tmp/requirements.txt
+
+# Add in some legacy modules
+ADD biokbase /opt/conda3/lib/python3.8/site-packages/biokbase
+
