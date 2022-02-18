@@ -1,5 +1,10 @@
 FROM ubuntu:20.04
 
+LABEL maintainer="scanon@lbl.gov"
+LABEL us.kbase.ubuntu="20.04"
+LABEL us.kbase.python="3.8.4"
+LABEL us.kbase.sdk="1.0.18"
+
 RUN \
     apt-get -y update && \
     export DEBIAN_FRONTEND=noninteractive && \
