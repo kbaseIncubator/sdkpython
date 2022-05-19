@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 LABEL maintainer="scanon@lbl.gov"
 LABEL us.kbase.ubuntu="20.04"
-LABEL us.kbase.python="3.8.4"
+LABEL us.kbase.python="3.10"
 LABEL us.kbase.sdk="1.0.18"
 
 RUN \
@@ -15,11 +15,13 @@ RUN \
 COPY --from=kbase/kb-sdk:20180808 /src /sdk
 RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
 
+# Install Conda version py39_4.12.0
 RUN \
-    V=py38_4.10.3 && \
+    V=py39_4.12.0 && \
     curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${V}-Linux-x86_64.sh && \
     sh ./conda.sh -b -p /opt/conda3 && \
     rm conda.sh
+    
 
 ENV PATH=/opt/conda3/bin:$PATH:/sdk/bin
 
