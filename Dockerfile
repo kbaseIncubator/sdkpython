@@ -38,4 +38,4 @@ RUN \
 
 # Add in some legacy modules
 ADD biokbase /opt/conda3/lib/python3.8/site-packages/biokbase
-
+ADD biokbase/user-env.sh /kb/deployment/user-env.sh
