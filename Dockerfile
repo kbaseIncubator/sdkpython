@@ -23,6 +23,9 @@ RUN \
 
 ENV PATH=/opt/conda3/bin:$PATH:/sdk/bin
 
+# Fix output for pip installations
+ENV PIP_PROGRESS_BAR=off
+
 # Install packages including mamba
 RUN \
     conda install -c conda-forge mamba
