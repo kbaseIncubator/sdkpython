@@ -7,6 +7,10 @@ LABEL us.kbase.python="3.9.12"
 LABEL us.kbase.sdk="1.2.1"
 LABEL us.kbase.sdkcommit="8def489f648a7ff5657d33ed05f41c60f4766e1b"
 
+# Fix KBase Catalog Registration Issue
+ENV PIP_PROGRESS_BAR=off
+
+# Install system dependencies
 RUN \
     apt-get -y update && \
     apt-get -y upgrade && \
@@ -20,11 +24,8 @@ RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
 
 
 # Install Conda version py39_4.12.0 and Python 3.9.12
-
 ENV CONDA_VERSION=py39_4.12.0
 ENV CONDA_INSTALL_DIR=/opt/conda{CONDA_VERSION}
-ENV BIOKBASE_INSTALL_DIR=${CONDA_INSTALL_DIR}/lib/python3.9/site-packages/biokbase
-ENV PIP_PROGRESS_BAR=off
 
 RUN \
     curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh && \
@@ -32,7 +33,8 @@ RUN \
     rm conda.sh
 
 # Add in some legacy modules
-ADD biokbase ${CONDA_INSTALL_DIR}/lib/python3.9/site-packages/biokbase
+ENV BIOKBASE_INSTALL_DIR=${CONDA_INSTALL_DIR}/lib/python3.9/site-packages/biokbase
+ADD biokbase ${BIOKBASE_INSTALL_DIR}
 ADD biokbase/user-env.sh /kb/deployment/user-env.sh
 
 
