@@ -36,11 +36,15 @@ ADD biokbase ${CONDA_INSTALL_DIR}/lib/python3.9/site-packages/biokbase
 ADD biokbase/user-env.sh /kb/deployment/user-env.sh
 
 
-# Install packages including mamba
+# Configure Conda and Install packages 
 RUN \
-    conda install -c conda-forge mamba
-ADD ./requirements.txt /tmp/
-RUN \
-    pip install -r /tmp/requirements.txt
-
-
+    conda config --add channels conda-forge \
+    conda config --set channel_priority strict \
+    conda install -y mamba=0.15.3 \
+    requests=2.27.1 \
+    coverage=6.3.3 \
+    nose=1.3.7 \
+    sphinx=4.5.0 \
+    jsonrpcbase=0.2.0 \
+    pytest=7.1.1 \
+    pytest-cov=3.0.0 \ 
