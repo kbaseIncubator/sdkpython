@@ -25,21 +25,30 @@ RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
 
 # Install Conda version py39_4.12.0 and Python 3.9.12
 ENV CONDA_VERSION=py39_4.12.0
-ENV CONDA_INSTALL_DIR=/opt/conda{CONDA_VERSION}
+ENV CONDA_INSTALL_DIR=/opt/conda/py39_4.12.0
 
 RUN \
+    echo "Installing to ${CONDA_INSTALL_DIR}"  && \
     curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh && \
     sh ./conda.sh -b -p ${CONDA_INSTALL_DIR} && \
     rm conda.sh
 
 # Add in some legacy modules
-ENV BIOKBASE_INSTALL_DIR=${CONDA_INSTALL_DIR}/lib/python3.9/site-packages/biokbase
-ADD biokbase ${BIOKBASE_INSTALL_DIR}
+
+ADD biokbase $CONDA_INSTALL_DIR/lib/biokbase
 ADD biokbase/user-env.sh /kb/deployment/user-env.sh
+ADD requirements.txt /tmp/requirements.txt
 
+ENV PATH=$CONDA_INSTALL_DIR/bin:/sdk/bin:$PATH
+run env
 
-# Configure Conda and Install packages 
+# Configure Conda and Install Mamba 
 RUN \
-    conda config --add channels conda-forge \
-    conda config --set channel_priority strict \
-    conda install -y mamba=0.15.3 \
+    conda config --add channels conda-forge  && \
+    conda config --set channel_priority strict && \
+    conda install -y mamba=0.15.3
+
+#Install packages required for base image
+RUN \ 
+    which pip && \
+    pip install -r /tmp/requirements.txt
