@@ -1,39 +1,54 @@
 FROM ubuntu:20.04
 
+# Note that these labels need to be manually updated with the actual contents of the image
 LABEL maintainer="scanon@lbl.gov"
 LABEL us.kbase.ubuntu="20.04"
-LABEL us.kbase.python="3.8.4"
-LABEL us.kbase.sdk="1.0.18"
+LABEL us.kbase.python="3.9.12"
+LABEL us.kbase.sdk="1.2.1"
+LABEL us.kbase.sdkcommit="8def489f648a7ff5657d33ed05f41c60f4766e1b"
 
-RUN \
-    apt-get -y update && \
-    export DEBIAN_FRONTEND=noninteractive && \
-    export TZ=Etc/UTC && \
-    apt-get -y install gcc make curl git openjdk-8-jre
-
-# Copy in the SDK
-COPY --from=kbase/kb-sdk:20180808 /src /sdk
-RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
-
-RUN \
-    V=py38_4.10.3 && \
-    curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${V}-Linux-x86_64.sh && \
-    sh ./conda.sh -b -p /opt/conda3 && \
-    rm conda.sh
-
-ENV PATH=/opt/conda3/bin:$PATH:/sdk/bin
-
-# Fix output for pip installations
+# Fix KBase Catalog Registration Issue
 ENV PIP_PROGRESS_BAR=off
 
-# Install packages including mamba
+# Install system dependencies
 RUN \
-    conda install -c conda-forge mamba
+    apt-get -y update && \
+    apt-get -y upgrade && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    export TZ=Etc/UTC && \
+    apt-get -y install gcc make curl git openjdk-8-jre unzip htop
 
-ADD ./requirements.txt /tmp/
+# Copy in the SDK
+COPY --from=kbase/kb-sdk:1.2.1 /src /sdk
+RUN sed -i 's|/src|/sdk|g' /sdk/bin/*
+
+
+# Install Conda version py39_4.12.0 and Python 3.9.12
+ENV CONDA_VERSION=py39_4.12.0
+ENV CONDA_INSTALL_DIR=/opt/conda/py39_4.12.0
+
 RUN \
-    pip install -r /tmp/requirements.txt
+    echo "Installing to ${CONDA_INSTALL_DIR}"  && \
+    curl -o conda.sh -s https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh && \
+    sh ./conda.sh -b -p ${CONDA_INSTALL_DIR} && \
+    rm conda.sh
 
 # Add in some legacy modules
-ADD biokbase /opt/conda3/lib/python3.8/site-packages/biokbase
 
+ADD biokbase $CONDA_INSTALL_DIR/lib/biokbase
+ADD biokbase/user-env.sh /kb/deployment/user-env.sh
+ADD requirements.txt /tmp/requirements.txt
+
+ENV PATH=$CONDA_INSTALL_DIR/bin:/sdk/bin:$PATH
+run env
+
+# Configure Conda and Install Mamba 
+RUN \
+    conda config --add channels conda-forge  && \
+    conda config --set channel_priority strict && \
+    conda install -y mamba=0.15.3
+
+#Install packages required for base image
+RUN \ 
+    which pip && \
+    pip install -r /tmp/requirements.txt
