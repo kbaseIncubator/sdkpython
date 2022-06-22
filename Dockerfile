@@ -35,7 +35,7 @@ RUN \
 
 # Add in some legacy modules
 
-ADD biokbase $CONDA_INSTALL_DIR/lib/biokbase
+ADD biokbase $CONDA_INSTALL_DIR/lib/python3.9/site-packages/biokbase
 ADD biokbase/user-env.sh /kb/deployment/user-env.sh
 ADD requirements.txt /tmp/requirements.txt
 
