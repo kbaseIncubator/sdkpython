@@ -1,6 +1,5 @@
 # Release Notes
 
-
 ## 0.0.1 - Jun 21, 2022
 Initial Release
 Base Image with Conda/Mamba highlights of versions: 
