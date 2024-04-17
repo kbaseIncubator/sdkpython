@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # Note that these labels need to be manually updated with the actual contents of the image
 LABEL maintainer="scanon@lbl.gov"
